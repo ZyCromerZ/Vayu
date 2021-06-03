@@ -41,7 +41,7 @@ static ssize_t gpio_status_show(struct device *dev,
 	// int gpio_status_result = 0;
 	struct ant_gpio_data *ant_data = dev_get_drvdata(dev);
 	for ( i=0; i<ant_data->count; i++ ) {
-	     dev_info(dev, "GPIO [%d] status: %d\n",i, ant_data->data[i].gpio_status);
+	     dev_dbg(dev, "GPIO [%d] status: %d\n",i, ant_data->data[i].gpio_status);
 	     if(ant_data->data[i].gpio_status == 1) {
                 result = 1;
              }
@@ -67,7 +67,7 @@ static void gpio_debounce_work(struct work_struct *work)
 
 			if (gpio_status == ant_data->data[i].gpio_status) {
 				snprintf(status_env, MAX_MSG_LENGTH, "STATUS=%d", gpio_status);
-				dev_info(dev, "Update testing mode status: %d\n", gpio_status);
+				dev_dbg(dev, "Update testing mode status: %d\n", gpio_status);
 				kobject_uevent_env(&dev->kobj, KOBJ_CHANGE, envp);
 			}
 			break;
@@ -81,7 +81,7 @@ static irqreturn_t testing_threaded_irq_handler(int irq, void *irq_data)
 	struct ant_gpio_data *ant_data = irq_data;
 	struct device *dev = ant_data->dev;
 
-	dev_info(dev, "irq [%d] triggered\n", irq);
+	dev_dbg(dev, "irq [%d] triggered\n", irq);
 	for ( i=0; i<ant_data->count; i++ ) {
 		if ( irq == ant_data->data[i].irq )
 		{
@@ -120,7 +120,7 @@ static int testing_mode_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	if ( of_property_read_u32(np, "debounce-time", &ant_data->debounce_time) ) {
-		dev_info(dev, "Failed to get debounce-time, use default.\n");
+		dev_dbg(dev, "Failed to get debounce-time, use default.\n");
 		ant_data->debounce_time = 5;
 	}
 
