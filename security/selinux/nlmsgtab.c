@@ -196,12 +196,12 @@ int selinux_nlmsg_lookup(u16 sclass, u16 nlmsg_type, u32 *perm)
 	return err;
 }
 
-static void nlmsg_set_getlink_perm(u32 perm)
+static void nlmsg_set_perm_for_type(u32 perm, u16 type)
 {
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(nlmsg_route_perms); i++) {
-		if (nlmsg_route_perms[i].nlmsg_type == RTM_GETLINK) {
+		if (nlmsg_route_perms[i].nlmsg_type == type) {
 			nlmsg_route_perms[i].perm = perm;
 			break;
 		}
@@ -215,7 +215,9 @@ static void nlmsg_set_getlink_perm(u32 perm)
 void selinux_nlmsg_init(void)
 {
 	if (selinux_android_nlroute_getlink())
-		nlmsg_set_getlink_perm(NETLINK_ROUTE_SOCKET__NLMSG_READPRIV);
+		nlmsg_set_perm_for_type(NETLINK_ROUTE_SOCKET__NLMSG_READPRIV,
+					RTM_GETLINK);
 	else
-		nlmsg_set_getlink_perm(NETLINK_ROUTE_SOCKET__NLMSG_READ);
+		nlmsg_set_perm_for_type(NETLINK_ROUTE_SOCKET__NLMSG_READ,
+					RTM_GETLINK);
 }
