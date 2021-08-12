@@ -877,6 +877,9 @@ lto-clang-flags	:= -flto=thin
 ifneq ($(call ld-option, --thinlto-cache-dir=.thinlto-cache),)
 LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
 endif
+ifneq ($(call ld-option, -thinlto-cache-dir=.thinlto-cache),)
+LDFLAGS		+= -thinlto-cache-dir=.thinlto-cache
+endif
 else
 lto-clang-flags	:= -flto
 endif
