@@ -710,14 +710,15 @@ ifeq ($(cc-name),clang)
 KBUILD_CFLAGS	+= -mcpu=cortex-a55 -mtune=cortex-a55
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-run-dce \
-		   -mllvm -polly-run-inliner \
-		   -mllvm -polly-opt-fusion=max \
-		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-detect-keep-going \
-		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-invariant-load-hoisting
+KBUILD_CFLAGS	+= $(call cc-option,-mllvm -polly,) \
+		   $(call cc-option,-mllvm -polly-run-dce,) \
+		   $(call cc-option,-mllvm -polly-run-inliner,) \
+		   $(call cc-option,-mllvm -polly-opt-fusion=max,) \
+		   $(call cc-option,-mllvm -polly-opt-isl-arg=--no-schedule-serialize-sccs,) \
+		   $(call cc-option,-mllvm -polly-ast-use-context,) \
+		   $(call cc-option,-mllvm -polly-detect-keep-going,) \
+		   $(call cc-option,-mllvm -polly-vectorizer=stripmine,) \
+		   $(call cc-option,-mllvm -polly-invariant-load-hoisting,)
 endif
 endif
 endif
