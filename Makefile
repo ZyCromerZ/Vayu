@@ -507,7 +507,7 @@ ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
 CLANG_FLAGS	+= -no-integrated-as
-CLANG_FLAGS	+= -Werror=unknown-warning-option
+CLANG_FLAGS	+= $(call cc-option, -Wno-unknown-warning-option)
 CLANG_FLAGS	+= $(call cc-option, -Wno-misleading-indentation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-bool-operation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-unsequenced)
@@ -914,6 +914,14 @@ KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
 endif
 
 KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
+
+# Limit inlining across translation units to reduce binary size
+LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+
+KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
+KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
+
+KBUILD_LDS_MODULE += $(srctree)/scripts/module-lto.lds
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto
