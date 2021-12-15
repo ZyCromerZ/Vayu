@@ -881,30 +881,17 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
-lto-clang-flags	:= -flto=thin
-ifneq ($(call ld-option, --thinlto-cache-dir=.thinlto-cache),)
-LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
-endif
-ifneq ($(call ld-option, -thinlto-cache-dir=.thinlto-cache),)
-LDFLAGS		+= -thinlto-cache-dir=.thinlto-cache
-endif
+lto-clang-flags	:= -flto=thin $(call cc-option, -fsplit-lto-unit)
+LDFLAGS		+= $(call ld-option, --thinlto-cache-dir=.thinlto-cache)
 else
 lto-clang-flags	:= -flto
 endif
-lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
-
-# Limit inlining across translation units to reduce binary size
-ifneq ($(call ld-option, -import-instr-limit=5),)
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
-
-KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
-KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
-endif
+lto-clang-flags += -fvisibility=hidden
 
 KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
 
 # Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+LD_FLAGS_LTO_CLANG := $(call ld-option, -mllvm -import-instr-limit=5)
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
