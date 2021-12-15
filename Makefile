@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 VERSION = 4
 PATCHLEVEL = 14
-SUBLEVEL = 255
+SUBLEVEL = 258
 EXTRAVERSION =
 NAME = Petit Gorille
 
@@ -703,12 +703,12 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 else
 KBUILD_CFLAGS   += -O3
+endif
 ifeq ($(cc-name),gcc)
 KBUILD_CFLAGS	+= -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
 endif
 ifeq ($(cc-name),clang)
 KBUILD_CFLAGS	+= -mcpu=cortex-a55 -mtune=cortex-a55
-endif
 endif
 
 KBUILD_CFLAGS += $(call cc-ifversion, -gt, 0900, \
@@ -881,27 +881,22 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
-lto-clang-flags	:= -flto=thin
-ifneq ($(call ld-option, --thinlto-cache-dir=.thinlto-cache),)
-LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
-endif
-ifneq ($(call ld-option, -thinlto-cache-dir=.thinlto-cache),)
-LDFLAGS		+= -thinlto-cache-dir=.thinlto-cache
-endif
+lto-clang-flags	:= -flto=thin $(call cc-option, -fsplit-lto-unit)
+LDFLAGS		+= $(call ld-option, --thinlto-cache-dir=.thinlto-cache)
 else
 lto-clang-flags	:= -flto
 endif
-lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
+lto-clang-flags += -fvisibility=hidden
+
+KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
 
 # Limit inlining across translation units to reduce binary size
-ifneq ($(call ld-option, -import-instr-limit=5),)
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+LD_FLAGS_LTO_CLANG := $(call ld-option, -mllvm -import-instr-limit=5)
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
-endif
 
-KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
+KBUILD_LDS_MODULE += $(srctree)/scripts/module-lto.lds
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto
