@@ -1,4 +1,4 @@
-TAGSS="LA.UM.9.1.r1-11200-SMxxx0.0"
+TAGSS="LA.UM.9.1.r1-11500-SMxxx0.0"
 
 initial-qcacld(){
     git fetch https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/$1 $2
@@ -23,8 +23,7 @@ upstream-qcacld qca-wifi-host-cmn $TAGSS
 
 
 git fetch https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/data-kernel $TAGSS && \
-git merge -X subtree=techpack/data FETCH_HEAD --signoff
-
+git merge -X subtree=techpack/data FETCH_HEAD --signoff && \
 git fetch https://source.codeaurora.org/quic/la/platform/vendor/opensource/audio-kernel $TAGSS && \
-git merge -X subtree=techpack/audio FETCH_HEAD --signoff
-
+git merge -X subtree=techpack/audio FETCH_HEAD --signoff && \
+git pull https://source.codeaurora.org/quic/la/kernel/msm-4.14 $TAGSS --signoff
