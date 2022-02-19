@@ -64,6 +64,7 @@ static DEFINE_SPINLOCK(suspend_lock);
 #define TAG "msm_adreno_tz: "
 
 #if 1
+static bool notifstats = false;
 static unsigned int adrenoboost = 2;
 static int uci_adrenoboost = 2;
 static int __init read_adrenoboost(char *s)
@@ -523,18 +524,24 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 		level += val;
 		level = max(level, 0);
 		level = min_t(int, level, devfreq->profile->max_state - 1);
-		printk("%s ADRENO jumping level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+		if (notifstats) {
+			printk("%s ADRENO jumping level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+		}
 		priv->bin.last_level = level;
 	} else {
 		if (val) {
 			priv->bin.cycles_keeping_level += 1 + abs(val/2); // higher value change quantity means more addition to cycles_keeping_level for easier switching
 			// going upwards in frequency -- make it harder on the low and high freqs, middle ground - let it move
 			if (val<0 && priv->bin.cycles_keeping_level < conservation_map_up[ last_level ]) {
-				printk("%s ADRENO not jumping UP level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				if (notifstats) {
+					printk("%s ADRENO not jumping UP level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				}
 			} else
 			// going downwards in frequency let it happen hard in the middle freqs
 			if (val>0 && priv->bin.cycles_keeping_level < conservation_map_down[ last_level ])  {
-				printk("%s ADRENO not jumping DOWN level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				if (notifstats) {
+					printk("%s ADRENO not jumping DOWN level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				}
 			} else
 			{
 				level += val;
@@ -544,7 +551,9 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 				priv->bin.cycles_keeping_level = 0;
 				// set new last level
 				priv->bin.last_level = level;
-				printk("%s ADRENO jumping level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				if (notifstats) {
+					printk("%s ADRENO jumping level = %d last_level = %d total=%d busy=%d original busy_time=%d \n", __func__, level, priv->bin.last_level, (int)priv->bin.total_time, (int)priv->bin.busy_time, (int)stats.busy_time);
+				}
 			}
 		}
 	}
